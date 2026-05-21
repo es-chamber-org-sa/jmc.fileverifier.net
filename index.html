@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Document Verification & Download Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #0b3954;
+            --accent-color: #008080;
+            --success-color: #1f7a42;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-muted: #666666;
+            --border-color: #eeeeee;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        .portal-container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 550px;
+            padding: 35px 30px;
+            box-sizing: border-box;
+            margin: 20px;
+            text-align: center;
+            border-top: 8px solid var(--primary-color);
+        }
+
+        /* Top Header */
+        .header logo-icon {
+            font-size: 40px;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 22px;
+            margin: 5px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin: 0 0 20px 0;
+            font-weight: 500;
+        }
+
+        /* Divider */
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--accent-color), transparent);
+            margin: 15px 0;
+        }
+
+        /* Verification Status Badge */
+        .status-box {
+            margin: 20px 0;
+        }
+
+        .badge-verified {
+            background-color: #e6f7ed;
+            color: var(--success-color);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #b3e6c4;
+            box-shadow: 0 2px 6px rgba(31, 122, 66, 0.08);
+        }
+
+        /* Responsive Data Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+
+        .data-table tr {
+            transition: background-color 0.2s;
+        }
+
+        .data-table tr:hover {
+            background-color: #f9fbfb;
+        }
+
+        .data-table th, .data-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 15px;
+            text-align: left;
+        }
+
+        .data-table th {
+            color: var(--primary-color);
+            font-weight: 600;
+            width: 40%;
+        }
+
+        .data-table td {
+            color: #444444;
+            word-break: break-word;
+        }
+
+        /* Action Download Button */
+        .action-container {
+            margin-top: 30px;
+        }
+
+        .btn-action-download {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background-color: var(--primary-color);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(11, 57, 84, 0.25);
+            cursor: pointer;
+        }
+
+        .btn-action-download:hover {
+            background-color: var(--accent-color);
+            box-shadow: 0 5px 20px rgba(0, 128, 128, 0.3);
+        }
+
+        .btn-action-download:active {
+            transform: scale(0.99);
+        }
+
+        /* Notice / Footer Note */
+        .security-notice {
+            font-size: 11px;
+            color: #888888;
+            margin-top: 25px;
+            line-height: 1.6;
+            background-color: #fcfcfc;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px dashed #dddddd;
+        }
+
+        /* Error Screen UI */
+        .error-container {
+            color: #d9534f;
+            padding: 20px 0;
+        }
+        .error-container i {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="portal-container" id="portalContainer">
+    <div class="header">
+        <div class="logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h1>Secured File Vault</h1>
+        <p>Official Verification & Distribution System</p>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="status-box">
+        <span class="badge-verified">
+            <i class="fa-solid fa-circle-check"></i> Authentic & Certified Document
+        </span>
+    </div>
+
+    <table class="data-table">
+        <tr>
+            <th><i class="fa-solid fa-hashtag" style="margin-right: 6px; color:#888;"></i> Tracking ID</th>
+            <td id="cellID">Loading...</td>
+        </tr>
+        <tr>
+            <th><i class="fa-solid fa-user" style="margin-right: 6px; color:#888;"></i> Recipient Name</th>
+            <td id="cellName">Loading...</td>
+        </tr>
+        <tr>
+            <th><i class="fa-solid fa-calendar-days" style="margin-right: 6px; color:#888;"></i> Generation Date</th>
+            <td id="cellDate">Loading...</td>
+        </tr>
+        <tr>
+            <th><i class="fa-solid fa-file-invoice" style="margin-right: 6px; color:#888;"></i> Document Type</th>
+            <td id="cellType">Loading...</td>
+        </tr>
+    </table>
+
+    <div class="action-container">
+        <a href="#" id="secureDownloadBtn" class="btn-action-download" download>
+            <i class="fa-solid fa-cloud-arrow-down"></i> Download Original File (PDF)
+        </a>
+    </div>
+
+    <div class="security-notice">
+        <i class="fa-solid fa-lock"></i> <strong>Security Standard:</strong> This page dynamically cross-checks the unique cryptographic token embedded inside the QR code. Altering the link parameters manually will render the verification void.
+    </div>
+</div>
+
+<script>
+    // ১. আপনার ডেমো লোকাল ডেটাবেজ (এখানে আপনি ইচ্ছেমত রেকর্ড অ্যাড বা এডিট করতে পারবেন)
+    const secureRecords = {
+        "DOC-786-X1": {
+            name: "Human Assets Training Institute",
+            date: "May 21, 2026",
+            type: "Official Authentication Certificate",
+            file: "certificates/hat_certified_786.pdf" // আপনার আসল ফাইলের লোকাল পাথ
+        },
+        "DOC-102-M4": {
+            name: "Naim Ahmed",
+            date: "May 18, 2026",
+            type: "Project Source Document",
+            file: "files/naim_project_v1.pdf"
+        }
+    };
+
+    // ২. URL-এর শেষ থেকে '?id=আপনার_আইডি' রিড করার জাভাস্ক্রিপ্ট কোড
+    function getUrlParameter(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+
+    // ৩. পেজ লোড হওয়ার পর ডাইনামিক ফিল্টারিং লজিক
+    window.onload = function() {
+        const currentToken = getUrlParameter('id');
+        
+        // টেস্টিং এর সুবিধার্থে: লিংকে যদি কোনো ID না থাকে, তবে প্রথম আইডিটি অটো শো করবে
+        const searchKey = currentToken ? currentToken.toUpperCase() : "DOC-786-X1";
+        const selectedData = secureRecords[searchKey];
+
+        if (selectedData) {
+            // টেবিলে ডেটা পুশ করা হচ্ছে
+            document.getElementById('cellID').innerText = searchKey;
+            document.getElementById('cellName').innerText = selectedData.name;
+            document.getElementById('cellDate').innerText = selectedData.date;
+            document.getElementById('cellType').innerText = selectedData.type;
+            
+            // ডাউনলোড বাটনে সঠিক ফাইলের লিংক জুড়ে দেওয়া হচ্ছে
+            document.getElementById('secureDownloadBtn').href = selectedData.file;
+        } else {
+            // যদি ভুল বা ফেক কোনো আইডি দিয়ে লিংকে ঢোকার চেষ্টা করা হয়
+            document.getElementById('portalContainer').innerHTML = `
+                <div class="error-container">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <h2>Verification Failure</h2>
+                    <p style="color: #666; font-size: 14px; line-height: 1.5;">
+                        The security certificate token provided in the URL query does not match any official ledger record in our database.
+                    </p>
+                    <div class="divider" style="margin: 25px 0 15px 0;"></div>
+                    <p style="font-size: 11px; color: #999;">Error Code: 404_SECURE_TOKEN_NOT_FOUND</p>
+                </div>
+            `;
+        }
+    }
+</script>
+
+</body>
+</html>
