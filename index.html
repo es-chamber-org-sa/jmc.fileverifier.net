@@ -5,103 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Verified</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-        body {
-            background-color: #f5f6fa;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 15px;
-        }
-        .container {
-            background: white;
-            max-width: 450px;
-            width: 100%;
-            padding: 30px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            text-align: center;
-        }
-        .status-title {
-            color: #2ecc71;
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        .generated-date {
-            color: #7f8c8d;
-            font-size: 13px;
-            margin-bottom: 20px;
-        }
-        .section-heading {
-            color: #000000;
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 15px;
-        }
-        .verification-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 25px;
-            text-align: left;
-            border: 1px solid #e2e8f0;
-        }
-        .verification-table tr {
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .verification-table tr:last-child {
-            border-bottom: none;
-        }
-        .verification-table td {
-            padding: 12px 15px;
-            font-size: 14px;
-            vertical-align: middle;
-        }
-        .verification-table td.label {
-            background-color: #f8fafc;
-            font-weight: 700;
-            color: #2d3748;
-            width: 35%;
-            border-right: 1px solid #e2e8f0;
-        }
-        .verification-table td.value {
-            color: #4a5568;
-            font-weight: 500;
-            word-break: break-word;
-        }
-        .btn-download {
-            display: inline-block;
-            background-color: #007bff;
-            color: white;
-            text-decoration: none;
-            padding: 12px 35px;
-            border-radius: 6px;
-            font-weight: 500;
-            font-size: 15px;
-            transition: background-color 0.2s ease;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,123,255,0.2);
-        }
-        .btn-download:hover {
-            background-color: #0056b3;
-        }
-        .loading-text {
-            color: #7f8c8d;
-            font-size: 14px;
-            font-style: italic;
-        }
-        .error-container {
-            color: #e74c3c;
-            font-weight: bold;
-            margin: 20px 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; }
+        body { background-color: #f5f6fa; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 15px; }
+        .container { background: white; max-width: 450px; width: 100%; padding: 30px 20px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; }
+        .status-title { color: #2ecc71; font-size: 24px; font-weight: 700; margin-bottom: 5px; }
+        .generated-date { color: #7f8c8d; font-size: 13px; margin-bottom: 20px; }
+        .section-heading { color: #000000; font-size: 16px; font-weight: 700; margin-bottom: 15px; }
+        .verification-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; text-align: left; border: 1px solid #e2e8f0; }
+        .verification-table tr { border-bottom: 1px solid #e2e8f0; }
+        .verification-table td { padding: 12px 15px; font-size: 14px; }
+        .verification-table td.label { background-color: #f8fafc; font-weight: 700; color: #2d3748; width: 35%; border-right: 1px solid #e2e8f0; }
+        .verification-table td.value { color: #4a5568; font-weight: 500; word-break: break-word; }
+        .btn-download { display: inline-block; background-color: #007bff; color: white; text-decoration: none; padding: 12px 35px; border-radius: 6px; font-weight: 500; font-size: 15px; border: none; cursor: pointer; }
+        .loading-text { color: #7f8c8d; font-size: 14px; font-style: italic; }
+        .error-container { color: #e74c3c; font-weight: bold; margin: 20px 0; }
     </style>
 </head>
 <body>
@@ -109,102 +26,59 @@
 <div class="container" id="main-container">
     <div class="status-title" id="status-text">QR Code Verified</div>
     <div class="generated-date" id="live-date">Checking Registry...</div>
-    
     <div class="section-heading">Information stored in the QR:</div>
     
     <table class="verification-table">
-        <tr>
-            <td class="label">Clinic</td>
-            <td class="value" id="data-clinic">Loading...</td>
-        </tr>
-        <tr>
-            <td class="label">Patient ID</td>
-            <td class="value" id="data-patient-id">Loading...</td>
-        </tr>
-        <tr>
-            <td class="label">Patient Name</td>
-            <td class="value" id="data-name">Loading...</td>
-        </tr>
-        <tr>
-            <td class="label">Age</td>
-            <td class="value" id="data-age">Loading...</td>
-        </tr>
-        <tr>
-            <td class="label">Gender</td>
-            <td class="value" id="data-gender">Loading...</td>
-        </tr>
+        <tr><td class="label">Clinic</td><td class="value" id="data-clinic">Loading...</td></tr>
+        <tr><td class="label">Patient ID</td><td class="value" id="data-patient-id">Loading...</td></tr>
+        <tr><td class="label">Patient Name</td><td class="value" id="data-name">Loading...</td></tr>
+        <tr><td class="label">Age</td><td class="value" id="data-age">Loading...</td></tr>
+        <tr><td class="label">Gender</td><td class="value" id="data-gender">Loading...</td></tr>
     </table>
-
     <a id="download-btn" class="btn-download" style="display: none;">Download File</a>
     <div id="status-msg" class="loading-text">Fetching secure data...</div>
 </div>
 
 <script>
-    // 🛠️ আপনার GOOGLE APPS SCRIPT WEB APP-এর পুরো লিংকটি নিচে বসান
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw5-VIz89eU9U5-Rjo7LjwOiPUOmQ4ELiTY2c-OcsOfjwAK4Vg-xc6jCbJWcLmw1nAM/exec';
+    // 🛠️ আপনার GOOGLE APPS SCRIPT WEB APP-এর লিংকটি এখানে বসান
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkGxTtSkG_tCZAtarY-UuEfOfRZFAzFWtirCBwRB_RMeK_8X8_hwtKSPJYFPoUf1Zd/exec';
 
     const urlParams = new URLSearchParams(window.location.search);
-    const searchId = urlParams.get('id');
+    let rawId = urlParams.get('id') || '';
 
-    // Live Date formatting
+    // 🔍 ম্যাজিক ট্রিক: বড় এনক্রিপ্টেড টেক্সটের ভেতর লুকিয়ে থাকা যেকোনো ৪ থেকে ৮ ডিজিটের আইডি নম্বর স্বয়ংক্রিয়ভাবে বের করবে
+    let cleanId = rawId;
+    let match = rawId.match(/\d{4,8}/); 
+    if (match) {
+        cleanId = match[0]; 
+    }
+
+    // Live Date
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     document.getElementById('live-date').innerText = "Generated on: " + new Date().toLocaleDateString('en-GB', options).replace(/ /g, '-') + " " + new Date().toLocaleTimeString('en-GB');
 
-    // Auto Age Calculator (Y, M, D)
-    function calculateExactAge(dobData) {
-        if (!dobData) return 'N/A';
-        let dob = new Date(dobData);
-        
-        if (isNaN(dob.getTime())) {
-            return String(dobData); // যদি কোনো কারণে জন্মতারিখ ফরম্যাট মিস হয়, শিটের লেখা দেখাবে
-        }
-
-        let now = new Date();
-        let years = now.getFullYear() - dob.getFullYear();
-        let months = now.getMonth() - dob.getMonth();
-        let days = now.getDate() - dob.getDate();
-
-        if (days < 0) {
-            months--;
-            let prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-            days += prevMonth.getDate();
-        }
-        if (months < 0) {
-            years--;
-            months += 12;
-        }
-
-        return `${years} Y(s), ${months} M(s) ${days} D(s)`;
-    }
-
-    if (searchId) {
-        fetch(`${SCRIPT_URL}?id=${encodeURIComponent(searchId.trim())}`)
+    if (cleanId) {
+        fetch(`${SCRIPT_URL}?id=${encodeURIComponent(cleanId.trim())}`)
             .then(res => res.json())
             .then(response => {
                 if (response.status === "success") {
                     const record = response.data;
-                    
                     document.getElementById('data-clinic').innerText = record.clinic;
                     document.getElementById('data-patient-id').innerText = record.patientId;
                     document.getElementById('data-name').innerText = record.name;
-                    document.getElementById('data-age').innerText = calculateExactAge(record.age); // বয়স অটো জেনারেট
+                    document.getElementById('data-age').innerText = record.age;
                     document.getElementById('data-gender').innerText = record.gender;
-                    
                     document.getElementById('status-msg').style.display = 'none';
 
-                    const fileUrl = `${searchId}.pdf`;
                     const downloadBtn = document.getElementById('download-btn');
-                    downloadBtn.href = fileUrl;
-                    downloadBtn.download = `Verified_File_${searchId}.pdf`; 
+                    downloadBtn.href = `${cleanId}.pdf`;
+                    downloadBtn.download = `Verified_File_${cleanId}.pdf`; 
                     downloadBtn.style.display = 'inline-block';
                 } else {
                     showError("Invalid Patient ID / Not Found");
                 }
             })
-            .catch(err => {
-                console.error(err);
-                showError("Database Connection Error. Check Web App Deployment.");
-            });
+            .catch(() => showError("Database Connection Error."));
     } else {
         showError("No Patient ID Specified");
     }
@@ -212,9 +86,8 @@
     function showError(message) {
         document.getElementById('status-text').innerText = "Verification Failed";
         document.getElementById('status-text').style.color = "#e74c3c";
-        document.getElementById('main-container').innerHTML = `<div class="error-container">${message}</div><p style="color:#7f8c8d; font-size:14px;">The document system could not verify this reference.</p>`;
+        document.getElementById('main-container').innerHTML = `<div class="error-container">${message}</div>`;
     }
 </script>
-
 </body>
 </html>
