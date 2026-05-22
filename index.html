@@ -3,87 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Official Document Verification Portal</title>
+    <title>QR Code Verified</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
-        .card { background: white; max-width: 500px; width: 100%; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); border-top: 8px solid #0a3d62; text-align: center; }
-        h2 { color: #0a3d62; font-size: 24px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-        p.subtitle { color: #57606f; font-size: 14px; margin-bottom: 25px; font-weight: 500; }
-        .badge { display: inline-flex; align-items: center; background-color: #ebfcf2; color: #10ac84; padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 15px; margin-bottom: 30px; border: 1px solid #b7f4cf; }
-        .badge::before { content: "✓"; margin-right: 8px; font-weight: bold; }
-        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; text-align: left; }
-        .info-table tr { border-bottom: 1px solid #eceff1; }
-        .info-table td { padding: 15px 10px; font-size: 15px; color: #2c3e50; }
-        .info-table td.label { font-weight: 500; color: #60a3bc; width: 40%; }
-        .info-table td.value { font-weight: 600; text-align: right; }
-        .status-ready { color: #10ac84; display: inline-flex; align-items: center; gap: 5px; }
-        .status-ready::before { content: "●"; color: #10ac84; }
-        .download-msg { font-size: 13px; color: #7f8c8d; margin-top: 15px; font-style: italic; }
-        .btn-retry { display: inline-block; margin-top: 10px; color: #0a3d62; font-size: 13px; font-weight: 600; text-decoration: none; border-bottom: 1px dashed #0a3d62; cursor: pointer; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: #f5f6fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+        .container {
+            background: white;
+            max-width: 450px;
+            width: 100%;
+            padding: 30px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            text-align: center;
+        }
+        
+        /* Reference main header layout */
+        .status-title {
+            color: #2ecc71;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .generated-date {
+            color: #7f8c8d;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .section-heading {
+            color: #000000;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        /* Same to Same Table Design from Screenshot */
+        .verification-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+        .verification-table tr {
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .verification-table tr:last-child {
+            border-bottom: none;
+        }
+        .verification-table td {
+            padding: 12px 15px;
+            font-size: 14px;
+            vertical-align: middle;
+        }
+        .verification-table td.label {
+            background-color: #f8fafc;
+            font-weight: 700;
+            color: #2d3748;
+            width: 35%;
+            border-right: 1px solid #e2e8f0;
+        }
+        .verification-table td.value {
+            color: #4a5568;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        /* Exactly Styled Download Button */
+        .btn-download {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 12px 35px;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 15px;
+            transition: background-color 0.2s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,123,255,0.2);
+        }
+        .btn-download:hover {
+            background-color: #0056b3;
+        }
+        
+        .loading-text {
+            color: #7f8c8d;
+            font-size: 14px;
+            font-style: italic;
+        }
+        .error-container {
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Official Verification</h2>
-    <p class="subtitle">Human Assets Training Institute</p>
+<div class="container" id="main-container">
+    <div class="status-title" id="status-text">QR Code Verified</div>
+    <div class="generated-date" id="live-date">Checking Registry...</div>
     
-    <div class="badge">Authenticity Verified</div>
+    <div class="section-heading">Information stored in the QR:</div>
     
-    <table class="info-table">
+    <table class="verification-table">
         <tr>
-            <td class="label">Document Track:</td>
-            <td class="value" id="doc-id">Checking...</td>
+            <td class="label">Clinic</td>
+            <td class="value" id="data-clinic">Loading...</td>
         </tr>
         <tr>
-            <td class="label">Link Status:</td>
-            <td class="value status-ready">Secure & Ready</td>
+            <td class="label">Patient ID</td>
+            <td class="value" id="data-patient-id">Loading...</td>
+        </tr>
+        <tr>
+            <td class="label">Patient Name</td>
+            <td class="value" id="data-name">Loading...</td>
+        </tr>
+        <tr>
+            <td class="label">Age</td>
+            <td class="value" id="data-age">Loading...</td>
+        </tr>
+        <tr>
+            <td class="label">Gender</td>
+            <td class="value" id="data-gender">Loading...</td>
         </tr>
     </table>
 
-    <div class="download-msg" id="download-status">Preparing your download...</div>
-    <a id="manual-link" class="btn-retry" style="display: none;">Click here if download doesn't start</a>
+    <a id="download-btn" class="btn-download" style="display: none;">Download File</a>
+    <div id="status-msg" class="loading-text">Fetching secure data...</div>
 </div>
 
 <script>
-    // ১. URL থেকে ডাইনামিক আইডি (?id=003) খুঁজে নেওয়া
+    // ==========================================
+    // 🛠️ APNAR GOOGLE SHEET ID TI EKHANE BOSHAN
+    // ==========================================
+    const SHEET_ID = 'YOUR_SPREADSHEET_ID_HERE'; 
+    const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+
+    // URL theke dynamic id (?id=003) string ta check kora
     const urlParams = new URLSearchParams(window.location.search);
     const docId = urlParams.get('id');
 
-    const docIdElement = document.getElementById('doc-id');
-    const downloadStatus = document.getElementById('download-status');
-    const manualLink = document.getElementById('manual-link');
+    // Live Date handle korar jonne (Aper screenshot er moto display format)
+    const options = { year: 'numeric', month: 'short', day: 'numeric' };
+    document.getElementById('live-date').innerText = "Generated on: " + new Date().toLocaleDateString('en-GB', options).replace(/ /g, '-') + " " + new Date().toLocaleTimeString('en-GB');
 
     if (docId) {
-        // টেবিলে আইডি সেট করা
-        docIdElement.innerText = docId;
+        fetch(SHEET_URL)
+            .then(res => res.text())
+            .then(rawText => {
+                // Google Sheets JSON structure extract kora
+                const jsonClean = JSON.parse(rawText.substr(47).slice(0, -2));
+                const rows = jsonClean.table.rows;
+                
+                let record = null;
 
-        // আপনার রুট ফোল্ডারে থাকা ফাইলের নাম (যেমন: 003.pdf)
-        const fileUrl = `${docId}.pdf`; 
+                // Loop chaliye match kora hocche Column A (id) er shathe
+                for (let row of rows) {
+                    const idValue = row.c[0] ? String(row.c[0].v).trim() : '';
+                    if (idValue === docId.trim()) {
+                        record = {
+                            clinic: row.c[1] ? row.c[1].v : 'N/A',
+                            patientId: row.c[2] ? row.c[2].v : 'N/A',
+                            name: row.c[3] ? row.c[3].v : 'N/A',
+                            age: row.c[4] ? row.c[4].v : 'N/A',
+                            gender: row.c[5] ? row.c[5].v : 'N/A'
+                        };
+                        break;
+                    }
+                }
 
-        // ২. অটোমেটিক ডাউনলোড ট্রিগার করা
-        setTimeout(() => {
-            const anchor = document.createElement('a');
-            anchor.href = fileUrl;
-            anchor.download = "Verified File.pdf"; // ইউজার এই নামে ফাইলটি পাবে
-            document.body.appendChild(anchor);
-            anchor.click();
-            document.body.removeChild(anchor);
+                if (record) {
+                    // Document valid hole table cell update hobe
+                    document.getElementById('data-clinic').innerText = record.clinic;
+                    document.getElementById('data-patient-id').innerText = record.patientId;
+                    document.getElementById('data-name').innerText = record.name;
+                    document.getElementById('data-age').innerText = record.age;
+                    document.getElementById('data-gender').innerText = record.gender;
+                    
+                    document.getElementById('status-msg').style.display = 'none';
 
-            // স্ট্যাটাস টেক্সট আপডেট
-            downloadStatus.innerText = "Download started automatically.";
-            
-            // যদি অটো ডাউনলোড ব্লক হয়, তাহলে ম্যানুয়াল বাটন দেখাবে
-            manualLink.href = fileUrl;
-            manualLink.download = "Verified File.pdf";
-            manualLink.style.display = "inline-block";
-        }, 1500); // ১.৫ সেকেন্ড পর ডাউনলোড শুরু হবে
+                    // Target PDF URL prepare (e.g., 003.pdf root directory theke)
+                    const fileUrl = `${docId}.pdf`;
+                    const downloadBtn = document.getElementById('download-btn');
+                    
+                    downloadBtn.href = fileUrl;
+                    downloadBtn.download = "Verified File.pdf"; 
+                    downloadBtn.style.display = 'inline-block';
 
+                } else {
+                    showError("Invalid Document ID / Not Found");
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showError("Database Connection Error");
+            });
     } else {
-        docIdElement.innerText = "No document specified";
-        docIdElement.style.color = "#ff4d4d";
-        downloadStatus.innerText = "Error: Invalid or missing document reference.";
+        showError("No Document Specified");
+    }
+
+    function showError(message) {
+        document.getElementById('status-text').innerText = "Verification Failed";
+        document.getElementById('status-text').style.color = "#e74c3c";
+        document.getElementById('main-container').innerHTML = `<div class="error-container">${message}</div><p style="color:#7f8c8d; font-size:14px;">The document system could not verify this reference.</p>`;
     }
 </script>
 
