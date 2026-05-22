@@ -16,7 +16,8 @@
         .verification-table td { padding: 12px 15px; font-size: 14px; }
         .verification-table td.label { background-color: #f8fafc; font-weight: 700; color: #2d3748; width: 35%; border-right: 1px solid #e2e8f0; }
         .verification-table td.value { color: #4a5568; font-weight: 500; word-break: break-word; }
-        .btn-download { display: inline-block; background-color: #007bff; color: white; text-decoration: none; padding: 12px 35px; border-radius: 6px; font-weight: 500; font-size: 15px; border: none; cursor: pointer; }
+        .btn-download { display: inline-block; background-color: #007bff; color: white; text-decoration: none; padding: 12px 35px; border-radius: 6px; font-weight: 500; font-size: 15px; border: none; cursor: pointer; transition: 0.2s; }
+        .btn-download:hover { background-color: #0056b3; }
         .loading-text { color: #7f8c8d; font-size: 14px; font-style: italic; }
         .error-container { color: #e74c3c; font-weight: bold; margin: 20px 0; }
     </style>
@@ -40,25 +41,18 @@
 </div>
 
 <script>
-    // 🛠️ আপনার GOOGLE APPS SCRIPT WEB APP-এর লিংকটি এখানে বসান
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkGxTtSkG_tCZAtarY-UuEfOfRZFAzFWtirCBwRB_RMeK_8X8_hwtKSPJYFPoUf1Zd/exec';
+    // 🛠️ আপনার GOOGLE APPS SCRIPT-এর নতুন DEPLOYMENT LINK-টি এখানে বসান
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwW68-Pu5VZJELca3dAVRGiyBSinZjhZhzdTWnCHvBm1ldepf8TjQ-73boYK-0Mvttr/exec';
 
     const urlParams = new URLSearchParams(window.location.search);
-    let rawId = urlParams.get('id') || '';
+    const searchId = urlParams.get('id');
 
-    // 🔍 ম্যাজিক ট্রিক: বড় এনক্রিপ্টেড টেক্সটের ভেতর লুকিয়ে থাকা যেকোনো ৪ থেকে ৮ ডিজিটের আইডি নম্বর স্বয়ংক্রিয়ভাবে বের করবে
-    let cleanId = rawId;
-    let match = rawId.match(/\d{4,8}/); 
-    if (match) {
-        cleanId = match[0]; 
-    }
-
-    // Live Date
+    // Live Date formatting
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     document.getElementById('live-date').innerText = "Generated on: " + new Date().toLocaleDateString('en-GB', options).replace(/ /g, '-') + " " + new Date().toLocaleTimeString('en-GB');
 
-    if (cleanId) {
-        fetch(`${SCRIPT_URL}?id=${encodeURIComponent(cleanId.trim())}`)
+    if (searchId) {
+        fetch(`${SCRIPT_URL}?id=${encodeURIComponent(searchId.trim())}`)
             .then(res => res.json())
             .then(response => {
                 if (response.status === "success") {
@@ -71,14 +65,14 @@
                     document.getElementById('status-msg').style.display = 'none';
 
                     const downloadBtn = document.getElementById('download-btn');
-                    downloadBtn.href = `${cleanId}.pdf`;
-                    downloadBtn.download = `Verified_File_${cleanId}.pdf`; 
+                    downloadBtn.href = `${searchId.trim()}.pdf`; // PDF ফাইলটির নাম আইডি অনুযায়ী হতে হবে (যেমন 101010.pdf)
+                    downloadBtn.download = `Verified_File_${searchId.trim()}.pdf`; 
                     downloadBtn.style.display = 'inline-block';
                 } else {
                     showError("Invalid Patient ID / Not Found");
                 }
             })
-            .catch(() => showError("Database Connection Error."));
+            .catch(() => showError("Database Connection Error. Check Web App Deployment."));
     } else {
         showError("No Patient ID Specified");
     }
@@ -86,7 +80,7 @@
     function showError(message) {
         document.getElementById('status-text').innerText = "Verification Failed";
         document.getElementById('status-text').style.color = "#e74c3c";
-        document.getElementById('main-container').innerHTML = `<div class="error-container">${message}</div>`;
+        document.getElementById('main-container').innerHTML = `<div class="error-container">${message}</div><p style="color:#7f8c8d; font-size:14px;">The document system could not verify this reference.</p>`;
     }
 </script>
 </body>
