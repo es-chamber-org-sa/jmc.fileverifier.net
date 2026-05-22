@@ -29,7 +29,6 @@
             text-align: center;
         }
         
-        /* Reference main header layout */
         .status-title {
             color: #2ecc71;
             font-size: 24px;
@@ -48,7 +47,7 @@
             margin-bottom: 15px;
         }
 
-        /* Same to Same Table Design from Screenshot */
+        /* Table Design Matching Your Screenshot */
         .verification-table {
             width: 100%;
             border-collapse: collapse;
@@ -80,7 +79,7 @@
             word-break: break-word;
         }
 
-        /* Exactly Styled Download Button */
+        /* Download Button Styling */
         .btn-download {
             display: inline-block;
             background-color: #007bff;
@@ -147,17 +146,20 @@
 </div>
 
 <script>
-    // ==========================================
-    // 🛠️ APNAR GOOGLE SHEET ID TI EKHANE BOSHAN
-    // ==========================================
-    const SHEET_ID = '1jWFBp_7H4L0OJLZhF44a2yvTgktp1t0KAf6RLoimFUQ'; 
-    const SHEET_URL = `https://docs.google.com/spreadsheets/d/1jWFBp_7H4L0OJLZhF44a2yvTgktp1t0KAf6RLoimFUQ/edit?usp=sharing`;
+    // =============================================================
+    // 🛠️ EKHANE APNAR GOOGLE SHEET ER PURO LINK/URL TA BOSHABEN
+    // =============================================================
+    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1jWFBp_7H4L0OJLZhF44a2yvTgktp1t0KAf6RLoimFUQ/edit?usp=sharing'; 
 
-    // URL theke dynamic id (?id=003) string ta check kora
+    // URL theke full link extract kore JSON format a convert korar logic
+    const baseSheetUrl = GOOGLE_SHEET_URL.replace(/\/edit.*/, '');
+    const SHEET_URL = `${baseSheetUrl}/gviz/tq?tqx=out:json`;
+
+    // URL parameter (?id=003) validation
     const urlParams = new URLSearchParams(window.location.search);
     const docId = urlParams.get('id');
 
-    // Live Date handle korar jonne (Aper screenshot er moto display format)
+    // Live Date & Time display format
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     document.getElementById('live-date').innerText = "Generated on: " + new Date().toLocaleDateString('en-GB', options).replace(/ /g, '-') + " " + new Date().toLocaleTimeString('en-GB');
 
@@ -165,13 +167,13 @@
         fetch(SHEET_URL)
             .then(res => res.text())
             .then(rawText => {
-                // Google Sheets JSON structure extract kora
+                // Google Sheets output structure clean up
                 const jsonClean = JSON.parse(rawText.substr(47).slice(0, -2));
                 const rows = jsonClean.table.rows;
                 
                 let record = null;
 
-                // Loop chaliye match kora hocche Column A (id) er shathe
+                // Column A (id) er shathe matching logic
                 for (let row of rows) {
                     const idValue = row.c[0] ? String(row.c[0].v).trim() : '';
                     if (idValue === docId.trim()) {
@@ -187,7 +189,7 @@
                 }
 
                 if (record) {
-                    // Document valid hole table cell update hobe
+                    // Updating UI elements with verified sheet data
                     document.getElementById('data-clinic').innerText = record.clinic;
                     document.getElementById('data-patient-id').innerText = record.patientId;
                     document.getElementById('data-name').innerText = record.name;
@@ -196,12 +198,12 @@
                     
                     document.getElementById('status-msg').style.display = 'none';
 
-                    // Target PDF URL prepare (e.g., 003.pdf root directory theke)
+                    // Setting up root directory PDF mapping
                     const fileUrl = `${docId}.pdf`;
                     const downloadBtn = document.getElementById('download-btn');
                     
                     downloadBtn.href = fileUrl;
-                    downloadBtn.download = "Verified File.pdf"; 
+                    downloadBtn.download = "Verified_File.pdf"; 
                     downloadBtn.style.display = 'inline-block';
 
                 } else {
@@ -210,7 +212,7 @@
             })
             .catch(err => {
                 console.error(err);
-                showError("Database Connection Error");
+                showError("Database Connection Error. Please check Google Sheet Share access.");
             });
     } else {
         showError("No Document Specified");
