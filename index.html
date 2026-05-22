@@ -47,7 +47,7 @@
             margin-bottom: 15px;
         }
 
-        /* Table Design Matching Your Screenshot */
+        /* Exact Table Design */
         .verification-table {
             width: 100%;
             border-collapse: collapse;
@@ -79,7 +79,7 @@
             word-break: break-word;
         }
 
-        /* Download Button Styling */
+        /* Blue Download Button */
         .btn-download {
             display: inline-block;
             background-color: #007bff;
@@ -146,49 +146,109 @@
 </div>
 
 <script>
-    // =============================================================
-    // 🛠️ আপনার GOOGLE SHEET-এর লিঙ্ক
-    // =============================================================
-    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1TJW89LtijictTE4mEQICtobVBgoHy0Szco6C3_aUHWE/edit?usp=sharing'; 
+    // 🛠️ আপনার গুগল শিটের আসল লিংকটি এখানে দেওয়া আছে
+    const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1jWFBp_7H4L0OJLZhF44a2yvTgktp1t0KAf6RLoimFUQ/edit?usp=sharing'; 
 
     const baseSheetUrl = GOOGLE_SHEET_URL.replace(/\/edit.*/, '');
     const SHEET_URL = `${baseSheetUrl}/gviz/tq?tqx=out:json`;
 
-    // URL থেকে আইডি (?id=1603245) নেওয়া, যা সরাসরি Patient ID-র সাথে মিলবে
+    // URL থেকে আইডি (?id=1603245) রিড করা, যা সরাসরি Patient ID কলামে খুঁজবে
     const urlParams = new URLSearchParams(window.location.search);
     const searchId = urlParams.get('id');
 
-    // Live Date format
+    // Live Date & Time
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     document.getElementById('live-date').innerText = "Generated on: " + new Date().toLocaleDateString('en-GB', options).replace(/ /g, '-') + " " + new Date().toLocaleTimeString('en-GB');
+
+    // 🧮 জন্মতারিখ ইনপুট নিয়ে বয়স (Y, M, D) বের করার অটোমেটিক ফাংশন
+    function calculateExactAge(dobString) {
+        if (!dobString) return 'N/A';
+        
+        let dob = new Date(dobString);
+        
+        // গুগল শিট থেকে আসা ডেট টেক্সট স্ট্রাকচার ক্লিনিং
+        if (isNaN(dob.getTime())) {
+            if (dobString.includes('Date')) {
+                const parts = dobString.match(/\d+/g);
+                if (parts && parts.length >= 3) {
+                    dob = new Date(parts[0], parts[1], parts[2]);
+                }
+            } else {
+                return dobString; 
+            }
+        }
+
+        let now = new Date();
+        
+        let years = now.getFullYear() - dob.getFullYear();
+        let months = now.getMonth() - dob.getMonth();
+        let days = now.getDate() - dob.getDate();
+
+        if (days < 0) {
+            months--;
+            let prevMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+            days += prevMonth.getDate();
+        }
+
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        return `${years} Y(s), ${months} M(s) ${days} D(s)`;
+    }
 
     if (searchId) {
         fetch(SHEET_URL)
             .then(res => res.text())
             .then(rawText => {
                 const jsonClean = JSON.parse(rawText.substr(47).slice(0, -2));
+                const cols = jsonClean.table.cols;
                 const rows = jsonClean.table.rows;
                 
+                let clinicIdx = -1, patientIdIdx = -1, nameIdx = -1, ageIdx = -1, genderIdx = -1;
+                
+                // আপনার রিকোয়ারমেন্ট অনুযায়ী কলামের নাম ম্যাচিং ট্র্যাকার
+                cols.forEach((col, index) => {
+                    if (col.label) {
+                        const label = col.label.trim().toLowerCase();
+                        if (label.includes('clinic')) clinicIdx = index;
+                        if (label.includes('patient id') || label.includes('patientid')) patientIdIdx = index;
+                        if (label.includes('name')) nameIdx = index;
+                        if (label.includes('age')) ageIdx = index; // 🎯 কলামের নাম Age-ই থাকবে
+                        if (label.includes('gender')) genderIdx = index;
+                    }
+                });
+
+                if (patientIdIdx === -1) {
+                    showError("Patient ID Column missing in Sheet headers.");
+                    return;
+                }
+
                 let record = null;
 
                 for (let row of rows) {
-                    // 🎯 এখন কলাম C (Patient Id, ইনডেক্স ২) থেকে আইডি চেক করবে সরাসরি
-                    const patientIdValue = row.c[2] ? String(row.c[2].v).trim() : '';
+                    if (!row.c || !row.c[patientIdIdx]) continue;
                     
+                    const cellValue = row.c[patientIdIdx].v;
+                    const patientIdValue = cellValue !== null ? String(cellValue).trim() : '';
+                    
+                    // সরাসরি Patient ID ম্যাচিং লজিক
                     if (patientIdValue === searchId.trim()) {
+                        let rawAgeData = (ageIdx !== -1 && row.c[ageIdx]) ? row.c[ageIdx].f || row.c[ageIdx].v : '';
+                        
                         record = {
-                            clinic: row.c[1] ? String(row.c[1].v) : 'N/A',
+                            clinic: (clinicIdx !== -1 && row.c[clinicIdx]) ? String(row.c[clinicIdx].v) : 'N/A',
                             patientId: patientIdValue,
-                            name: row.c[3] ? String(row.c[3].v) : 'N/A',
-                            age: row.c[4] ? String(row.c[4].v) : 'N/A',
-                            gender: row.c[5] ? String(row.c[5].v) : 'N/A'
+                            name: (nameIdx !== -1 && row.c[nameIdx]) ? String(row.c[nameIdx].v) : 'N/A',
+                            age: calculateExactAge(rawAgeData), // 🎯 বয়স অটো ক্যালকুলেট হবে এখান থেকে
+                            gender: (genderIdx !== -1 && row.c[genderIdx]) ? String(row.c[genderIdx].v) : 'N/A'
                         };
                         break;
                     }
                 }
 
                 if (record) {
-                    // ডেটা টেবিলে সেট করা
                     document.getElementById('data-clinic').innerText = record.clinic;
                     document.getElementById('data-patient-id').innerText = record.patientId;
                     document.getElementById('data-name').innerText = record.name;
@@ -197,12 +257,12 @@
                     
                     document.getElementById('status-msg').style.display = 'none';
 
-                    // পিডিএফ ডাউনলোডের পাথ সেট করা (যেমন: 1603245.pdf)
+                    // পেশেন্ট আইডি দিয়েই সরাসরি পিডিএফ ডাউনলোডের লিংক ম্যাপিং
                     const fileUrl = `${searchId}.pdf`;
                     const downloadBtn = document.getElementById('download-btn');
                     
                     downloadBtn.href = fileUrl;
-                    downloadBtn.download = "Verified_File.pdf"; 
+                    downloadBtn.download = `Verified_File_${searchId}.pdf`; 
                     downloadBtn.style.display = 'inline-block';
 
                 } else {
@@ -211,7 +271,7 @@
             })
             .catch(err => {
                 console.error(err);
-                showError("Database Connection Error. Please check Google Sheet Share access.");
+                showError("Database Connection Error. Check Sheet share access.");
             });
     } else {
         showError("No Patient ID Specified");
