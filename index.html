@@ -27,6 +27,7 @@
 <div class="container" id="main-container">
     <div class="status-title" id="status-text">QR Code Verified</div>
     <div class="generated-date" id="live-date">Checking Registry...</div>
+    
     <div class="section-heading">Information stored in the QR:</div>
     
     <table class="verification-table">
@@ -41,18 +42,24 @@
 </div>
 
 <script>
-    // ⚠️ মনোযোগ দিন: নিচের কোটে আপনার 'Publish to web' থেকে পাওয়া লিংকটি বসান
-    // শুধু লক্ষ্য রাখবেন লিংকটির শেষে যেন /pubhtml এর বদলে /pub?output=csv দেওয়া থাকে।
+    // 🔗 Apnar dewa asol Google Sheet CSV link-ti ekhane add kore diyechi
     const SHEET_WEB_LINK = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpSYuaPid9Zhgx9iBkc9ohvrbvg-hWu1uMbmHS-eZcs_33gd8RaNMftdiqah2CFbroBlqj73_VBcKC/pub?output=csv';
 
     const urlParams = new URLSearchParams(window.location.search);
-    const searchId = urlParams.get('id');
+    const rawId = urlParams.get('id') || '';
 
-    // Live Date formatting
+    // 🔍 Smart Extraction Trick: Boro token ba raw link thakle tar bhetor theke automatic 4-8 digit er asol Patient ID ber korbe
+    let cleanId = rawId.trim();
+    let idMatch = rawId.match(/\d{4,8}/);
+    if (idMatch) {
+        cleanId = idMatch[0]; 
+    }
+
+    // Live Date
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     document.getElementById('live-date').innerText = "Generated on: " + new Date().toLocaleDateString('en-GB', options).replace(/ /g, '-') + " " + new Date().toLocaleTimeString('en-GB');
 
-    // CSV parser function
+    // CSV Parser
     function parseCSV(text) {
         let lines = text.split('\n');
         return lines.map(line => {
@@ -70,15 +77,14 @@
         });
     }
 
-    if (searchId) {
+    if (cleanId) {
         fetch(SHEET_WEB_LINK)
             .then(res => res.text())
             .then(csvText => {
                 let rows = parseCSV(csvText);
                 if (rows.length < 2) { showError("Database is empty"); return; }
                 
-                // Header detection
-                let headers = rows[0].map(h => h.toLowerCase());
+                let headers = rows[0].map(h => h.toLowerCase().trim());
                 let clinicIdx = headers.indexOf('clinic');
                 let patientIdIdx = headers.indexOf('patient id');
                 let nameIdx = headers.indexOf('patient name');
@@ -86,17 +92,16 @@
                 let genderIdx = headers.indexOf('gender');
 
                 let record = null;
-                let targetId = searchId.trim();
 
                 for (let i = 1; i < rows.length; i++) {
                     let row = rows[i];
-                    let currentPatientId = row[patientIdIdx] || '';
+                    let sheetPatientId = row[patientIdIdx] ? row[patientIdIdx].toString().trim() : '';
                     
-                    // Simple search matching
-                    if (currentPatientId === targetId || targetId.indexOf(currentPatientId) !== -1 && currentPatientId !== '') {
+                    // Master matching logic (Direct ba token matching bypass system)
+                    if (sheetPatientId !== '' && (sheetPatientId === cleanId || rawId.indexOf(sheetPatientId) !== -1)) {
                         record = {
                             clinic: row[clinicIdx] || 'N/A',
-                            patientId: currentPatientId,
+                            patientId: sheetPatientId,
                             name: row[nameIdx] || 'N/A',
                             age: row[ageIdx] || 'N/A',
                             gender: row[genderIdx] || 'N/A'
@@ -113,6 +118,7 @@
                     document.getElementById('data-gender').innerText = record.gender;
                     document.getElementById('status-msg').style.display = 'none';
 
+                    // Dynamic PDF File button
                     const downloadBtn = document.getElementById('download-btn');
                     downloadBtn.href = `${record.patientId}.pdf`; 
                     downloadBtn.download = `Verified_File_${record.patientId}.pdf`; 
@@ -121,7 +127,7 @@
                     showError("Invalid Patient ID / Not Found");
                 }
             })
-            .catch(() => showError("Database Connection Error. Verify Web Publishing."));
+            .catch(() => showError("Database Connection Error."));
     } else {
         showError("No Patient ID Specified");
     }
@@ -129,7 +135,7 @@
     function showError(message) {
         document.getElementById('status-text').innerText = "Verification Failed";
         document.getElementById('status-text').style.color = "#e74c3c";
-        document.getElementById('main-container').innerHTML = `<div class="error-container">${message}</div>`;
+        document.getElementById('main-container').innerHTML = `<div class="error-container">${message}</div><p style="color:#7f8c8d; font-size:14px;">The document system could not verify this reference.</p>`;
     }
 </script>
 </body>
