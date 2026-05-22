@@ -4,121 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Official Document Verification Portal</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #0b3954;
-            --accent-color: #008080;
-            --success-color: #1f7a42;
-            --bg-color: #f4f7f6;
-            --border-color: #d1d5db;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            margin: 0; padding: 0;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh;
-        }
-        .portal-card {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            width: 100%; max-width: 480px;
-            padding: 30px; margin: 20px; text-align: center;
-            border-top: 6px solid var(--primary-color);
-            box-sizing: border-box;
-        }
-        .header h1 { color: var(--primary-color); font-size: 22px; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
-        .header p { color: #666; font-size: 13px; margin: 5px 0 20px 0; font-weight: 500; }
-        
-        .divider {
-            height: 3px;
-            background: linear-gradient(to right, transparent, var(--primary-color), transparent);
-            margin: 15px 0;
-        }
-
-        .status-badge {
-            background-color: #e6f7ed; color: var(--success-color);
-            padding: 8px 16px; border-radius: 50px;
-            font-size: 13px; font-weight: bold; display: inline-flex; align-items: center; gap: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #c2ebd0;
-        }
-        .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; text-align: left; }
-        .details-table th, .details-table td { padding: 14px 10px; border-bottom: 1px solid #edf2f7; font-size: 14px; }
-        .details-table th { color: #4a5568; font-weight: 600; width: 40%; }
-        .details-table td { color: #1a202c; font-weight: 500; }
-        
-        .btn-download {
-            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-            background-color: var(--primary-color); color: white; text-decoration: none;
-            padding: 15px; border-radius: 6px; font-size: 15px; font-weight: 600;
-            width: 100%; box-sizing: border-box; transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(11, 57, 84, 0.2);
-        }
-        .btn-download:hover { background-color: var(--accent-color); transform: translateY(-1px); }
-        .btn-download:active { transform: translateY(1px); }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f4f6f9; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: white; max-width: 500px; width: 100%; padding: 30px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.05); border-top: 8px solid #0a3d62; text-align: center; }
+        h2 { color: #0a3d62; font-size: 24px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
+        p.subtitle { color: #57606f; font-size: 14px; margin-bottom: 25px; font-weight: 500; }
+        .badge { display: inline-flex; align-items: center; background-color: #ebfcf2; color: #10ac84; padding: 8px 20px; border-radius: 20px; font-weight: 600; font-size: 15px; margin-bottom: 30px; border: 1px solid #b7f4cf; }
+        .badge::before { content: "✓"; margin-right: 8px; font-weight: bold; }
+        .info-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; text-align: left; }
+        .info-table tr { border-bottom: 1px solid #eceff1; }
+        .info-table td { padding: 15px 10px; font-size: 15px; color: #2c3e50; }
+        .info-table td.label { font-weight: 500; color: #60a3bc; width: 40%; }
+        .info-table td.value { font-weight: 600; text-align: right; }
+        .status-ready { color: #10ac84; display: inline-flex; align-items: center; gap: 5px; }
+        .status-ready::before { content: "●"; color: #10ac84; }
+        .download-msg { font-size: 13px; color: #7f8c8d; margin-top: 15px; font-style: italic; }
+        .btn-retry { display: inline-block; margin-top: 10px; color: #0a3d62; font-size: 13px; font-weight: 600; text-decoration: none; border-bottom: 1px dashed #0a3d62; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="portal-card">
-    <div class="header">
-        <h1>Official Verification</h1>
-        <p>Human Assets Training Institute</p>
-    </div>
-
-    <div class="divider"></div>
-
-    <div>
-        <span class="status-badge"><i class="fa-solid fa-shield-halved"></i> Authenticity Verified</span>
-    </div>
-
-    <table class="details-table">
+<div class="card">
+    <h2>Official Verification</h2>
+    <p class="subtitle">Human Assets Training Institute</p>
+    
+    <div class="badge">Authenticity Verified</div>
+    
+    <table class="info-table">
         <tr>
-            <th>Document Track:</th>
-            <td id="fileNameDisplay">Checking...</td>
+            <td class="label">Document Track:</td>
+            <td class="value" id="doc-id">Checking...</td>
         </tr>
         <tr>
-            <th>Link Status:</th>
-            <td style="color: var(--success-color); font-weight: bold;"><i class="fa-solid fa-circle-check"></i> Secure & Ready</td>
+            <td class="label">Link Status:</td>
+            <td class="value status-ready">Secure & Ready</td>
         </tr>
     </table>
 
-    <a href="#" id="downloadBtn" class="btn-download" download="Verified File">
-        <i class="fa-solid fa-file-arrow-down"></i> Download Verified PDF
-    </a>
+    <div class="download-msg" id="download-status">Preparing your download...</div>
+    <a id="manual-link" class="btn-retry" style="display: none;">Click here if download doesn't start</a>
 </div>
 
 <script>
-    window.onload = function() {
-        // URL থেকে ফাইলের নাম রিড করবে (যেমন: ?file=003.pdf)
-        const urlParams = new URLSearchParams(window.location.search);
-        let fileName = urlParams.get('file');
+    // ১. URL থেকে ডাইনামিক আইডি (?id=003) খুঁজে নেওয়া
+    const urlParams = new URLSearchParams(window.location.search);
+    const docId = urlParams.get('id');
 
-        if (fileName) {
-            // যদি ইউজার ভুল করে ডট পিডিএফ (.pdf) না লেখে, কোড নিজে থেকেই তা যোগ করে নেবে
-            if (!fileName.toLowerCase().endsWith('.pdf')) {
-                fileName += '.pdf';
-            }
+    const docIdElement = document.getElementById('doc-id');
+    const downloadStatus = document.getElementById('download-status');
+    const manualLink = document.getElementById('manual-link');
 
-            // টেবিলে সুন্দর করে ট্র্যাকিং আইডি দেখাবে (যেমন: JMC-003)
-            const cleanName = fileName.replace('.pdf', '').replace('.PDF', '');
-            document.getElementById('fileNameDisplay').innerText = "JMC-" + cleanName.toUpperCase();
+    if (docId) {
+        // টেবিলে আইডি সেট করা
+        docIdElement.innerText = docId;
+
+        // আপনার রুট ফোল্ডারে থাকা ফাইলের নাম (যেমন: 003.pdf)
+        const fileUrl = `${docId}.pdf`; 
+
+        // ২. অটোমেটিক ডাউনলোড ট্রিগার করা
+        setTimeout(() => {
+            const anchor = document.createElement('a');
+            anchor.href = fileUrl;
+            anchor.download = "Verified File.pdf"; // ইউজার এই নামে ফাইলটি পাবে
+            document.body.appendChild(anchor);
+            anchor.click();
+            document.body.removeChild(anchor);
+
+            // স্ট্যাটাস টেক্সট আপডেট
+            downloadStatus.innerText = "Download started automatically.";
             
-            // ডাউনলোড বাটনে সরাসরি ফাইলের পাথ বসিয়ে দেওয়া (files ফোল্ডার বা মেইন ডিরেক্টরি দুটোই চেক করবে)
-            // প্রথমে files/ফোল্ডার চেক করবে, না পেলে মেইন ডিরেক্টরি থেকে নিবে
-            document.getElementById('downloadBtn').href = "files/" + fileName;
-            
-            // অতিরিক্ত সুরক্ষার জন্য বাটনের ক্লিকে ডাবল চেক ব্যাকআপ
-            document.getElementById('downloadBtn').onerror = function() {
-                this.href = fileName;
-            };
-        } else {
-            document.getElementById('fileNameDisplay').innerText = "No document specified";
-            document.getElementById('downloadBtn').style.display = "none";
-        }
+            // যদি অটো ডাউনলোড ব্লক হয়, তাহলে ম্যানুয়াল বাটন দেখাবে
+            manualLink.href = fileUrl;
+            manualLink.download = "Verified File.pdf";
+            manualLink.style.display = "inline-block";
+        }, 1500); // ১.৫ সেকেন্ড পর ডাউনলোড শুরু হবে
+
+    } else {
+        docIdElement.innerText = "No document specified";
+        docIdElement.style.color = "#ff4d4d";
+        downloadStatus.innerText = "Error: Invalid or missing document reference.";
     }
 </script>
 
