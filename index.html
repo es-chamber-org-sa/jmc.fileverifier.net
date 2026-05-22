@@ -41,8 +41,9 @@
 </div>
 
 <script>
-    // 🛠️ আপনার GOOGLE APPS SCRIPT-এর নতুন DEPLOYMENT LINK-টি এখানে বসান
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwW68-Pu5VZJELca3dAVRGiyBSinZjhZhzdTWnCHvBm1ldepf8TjQ-73boYK-0Mvttr/exec';
+    // ⚠️ মনোযোগ দিন: নিচের কোটে আপনার 'Publish to web' থেকে পাওয়া লিংকটি বসান
+    // শুধু লক্ষ্য রাখবেন লিংকটির শেষে যেন /pubhtml এর বদলে /pub?output=csv দেওয়া থাকে।
+    const SHEET_WEB_LINK = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpSYuaPid9Zhgx9iBkc9ohvrbvg-hWu1uMbmHS-eZcs_33gd8RaNMftdiqah2CFbroBlqj73_VBcKC/pub?output=csv';
 
     const urlParams = new URLSearchParams(window.location.search);
     const searchId = urlParams.get('id');
@@ -51,12 +52,60 @@
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     document.getElementById('live-date').innerText = "Generated on: " + new Date().toLocaleDateString('en-GB', options).replace(/ /g, '-') + " " + new Date().toLocaleTimeString('en-GB');
 
+    // CSV parser function
+    function parseCSV(text) {
+        let lines = text.split('\n');
+        return lines.map(line => {
+            let result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                let char = line[i];
+                if (char === '"') { inQuotes = !inQuotes; }
+                else if (char === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
+                else { current += char; }
+            }
+            result.push(current.trim());
+            return result;
+        });
+    }
+
     if (searchId) {
-        fetch(`${SCRIPT_URL}?id=${encodeURIComponent(searchId.trim())}`)
-            .then(res => res.json())
-            .then(response => {
-                if (response.status === "success") {
-                    const record = response.data;
+        fetch(SHEET_WEB_LINK)
+            .then(res => res.text())
+            .then(csvText => {
+                let rows = parseCSV(csvText);
+                if (rows.length < 2) { showError("Database is empty"); return; }
+                
+                // Header detection
+                let headers = rows[0].map(h => h.toLowerCase());
+                let clinicIdx = headers.indexOf('clinic');
+                let patientIdIdx = headers.indexOf('patient id');
+                let nameIdx = headers.indexOf('patient name');
+                let ageIdx = headers.indexOf('age');
+                let genderIdx = headers.indexOf('gender');
+
+                let record = null;
+                let targetId = searchId.trim();
+
+                for (let i = 1; i < rows.length; i++) {
+                    let row = rows[i];
+                    let currentPatientId = row[patientIdIdx] || '';
+                    
+                    // Simple search matching
+                    if (currentPatientId === targetId || targetId.indexOf(currentPatientId) !== -1 && currentPatientId !== '') {
+                        record = {
+                            clinic: row[clinicIdx] || 'N/A',
+                            patientId: currentPatientId,
+                            name: row[nameIdx] || 'N/A',
+                            age: row[ageIdx] || 'N/A',
+                            gender: row[genderIdx] || 'N/A'
+                        };
+                        break;
+                    }
+                }
+
+                if (record) {
                     document.getElementById('data-clinic').innerText = record.clinic;
                     document.getElementById('data-patient-id').innerText = record.patientId;
                     document.getElementById('data-name').innerText = record.name;
@@ -65,14 +114,14 @@
                     document.getElementById('status-msg').style.display = 'none';
 
                     const downloadBtn = document.getElementById('download-btn');
-                    downloadBtn.href = `${searchId.trim()}.pdf`; // PDF ফাইলটির নাম আইডি অনুযায়ী হতে হবে (যেমন 101010.pdf)
-                    downloadBtn.download = `Verified_File_${searchId.trim()}.pdf`; 
+                    downloadBtn.href = `${record.patientId}.pdf`; 
+                    downloadBtn.download = `Verified_File_${record.patientId}.pdf`; 
                     downloadBtn.style.display = 'inline-block';
                 } else {
                     showError("Invalid Patient ID / Not Found");
                 }
             })
-            .catch(() => showError("Database Connection Error. Check Web App Deployment."));
+            .catch(() => showError("Database Connection Error. Verify Web Publishing."));
     } else {
         showError("No Patient ID Specified");
     }
@@ -80,7 +129,7 @@
     function showError(message) {
         document.getElementById('status-text').innerText = "Verification Failed";
         document.getElementById('status-text').style.color = "#e74c3c";
-        document.getElementById('main-container').innerHTML = `<div class="error-container">${message}</div><p style="color:#7f8c8d; font-size:14px;">The document system could not verify this reference.</p>`;
+        document.getElementById('main-container').innerHTML = `<div class="error-container">${message}</div>`;
     }
 </script>
 </body>
