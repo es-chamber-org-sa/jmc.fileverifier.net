@@ -147,49 +147,48 @@
 
 <script>
     // =============================================================
-    // 🛠️ EKHANE APNAR GOOGLE SHEET ER PURO LINK/URL TA BOSHABEN
+    // 🛠️ আপনার GOOGLE SHEET-এর লিঙ্ক
     // =============================================================
     const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1jWFBp_7H4L0OJLZhF44a2yvTgktp1t0KAf6RLoimFUQ/edit?usp=sharing'; 
 
-    // URL theke full link extract kore JSON format a convert korar logic
     const baseSheetUrl = GOOGLE_SHEET_URL.replace(/\/edit.*/, '');
     const SHEET_URL = `${baseSheetUrl}/gviz/tq?tqx=out:json`;
 
-    // URL parameter (?id=003) validation
+    // URL থেকে আইডি (?id=1603245) নেওয়া, যা সরাসরি Patient ID-র সাথে মিলবে
     const urlParams = new URLSearchParams(window.location.search);
-    const docId = urlParams.get('id');
+    const searchId = urlParams.get('id');
 
-    // Live Date & Time display format
+    // Live Date format
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     document.getElementById('live-date').innerText = "Generated on: " + new Date().toLocaleDateString('en-GB', options).replace(/ /g, '-') + " " + new Date().toLocaleTimeString('en-GB');
 
-    if (docId) {
+    if (searchId) {
         fetch(SHEET_URL)
             .then(res => res.text())
             .then(rawText => {
-                // Google Sheets output structure clean up
                 const jsonClean = JSON.parse(rawText.substr(47).slice(0, -2));
                 const rows = jsonClean.table.rows;
                 
                 let record = null;
 
-                // Column A (id) er shathe matching logic
                 for (let row of rows) {
-                    const idValue = row.c[0] ? String(row.c[0].v).trim() : '';
-                    if (idValue === docId.trim()) {
+                    // 🎯 এখন কলাম C (Patient Id, ইনডেক্স ২) থেকে আইডি চেক করবে সরাসরি
+                    const patientIdValue = row.c[2] ? String(row.c[2].v).trim() : '';
+                    
+                    if (patientIdValue === searchId.trim()) {
                         record = {
-                            clinic: row.c[1] ? row.c[1].v : 'N/A',
-                            patientId: row.c[2] ? row.c[2].v : 'N/A',
-                            name: row.c[3] ? row.c[3].v : 'N/A',
-                            age: row.c[4] ? row.c[4].v : 'N/A',
-                            gender: row.c[5] ? row.c[5].v : 'N/A'
+                            clinic: row.c[1] ? String(row.c[1].v) : 'N/A',
+                            patientId: patientIdValue,
+                            name: row.c[3] ? String(row.c[3].v) : 'N/A',
+                            age: row.c[4] ? String(row.c[4].v) : 'N/A',
+                            gender: row.c[5] ? String(row.c[5].v) : 'N/A'
                         };
                         break;
                     }
                 }
 
                 if (record) {
-                    // Updating UI elements with verified sheet data
+                    // ডেটা টেবিলে সেট করা
                     document.getElementById('data-clinic').innerText = record.clinic;
                     document.getElementById('data-patient-id').innerText = record.patientId;
                     document.getElementById('data-name').innerText = record.name;
@@ -198,8 +197,8 @@
                     
                     document.getElementById('status-msg').style.display = 'none';
 
-                    // Setting up root directory PDF mapping
-                    const fileUrl = `${docId}.pdf`;
+                    // পিডিএফ ডাউনলোডের পাথ সেট করা (যেমন: 1603245.pdf)
+                    const fileUrl = `${searchId}.pdf`;
                     const downloadBtn = document.getElementById('download-btn');
                     
                     downloadBtn.href = fileUrl;
@@ -207,7 +206,7 @@
                     downloadBtn.style.display = 'inline-block';
 
                 } else {
-                    showError("Invalid Document ID / Not Found");
+                    showError("Invalid Patient ID / Not Found");
                 }
             })
             .catch(err => {
@@ -215,7 +214,7 @@
                 showError("Database Connection Error. Please check Google Sheet Share access.");
             });
     } else {
-        showError("No Document Specified");
+        showError("No Patient ID Specified");
     }
 
     function showError(message) {
