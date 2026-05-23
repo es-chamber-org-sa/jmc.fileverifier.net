@@ -45,8 +45,6 @@
 
 <script>
     const SHEET_WEB_LINK = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpSYuaPid9Zhgx9iBkc9ohvrbvg-hWu1uMbmHS-eZcs_33gd8RaNMftdiqah2CFbroBlqj73_VBcKC/pub?output=csv';
-    
-    // ⚠️ আপনার GitHub Pages এর মেইন লিংক এবং যে ফোল্ডারে PDF রাখবেন সেটি এখানে দিন (শেষে একটা স্ল্যাশ / দিন)
     const GITHUB_REPO_URL = 'https://es-chamber-org-sa.github.io/jmc.fileverifier.net/reports/';
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -146,14 +144,15 @@
                     document.getElementById('data-gender').innerText = record.gender;
                     document.getElementById('status-msg').style.display = 'none';
 
-                    // --- GitHub থেকে PDF ডাউনলোডের মডিফাইড অংশ ---
                     const downloadBtn = document.getElementById('download-btn');
                     
-                    // এখানে GitHub-এর ডাইনামিক পাথটি সেট হচ্ছে
+                    // GitHub থেকে আসল ফাইলটা লোড করবে (যেমন: 101010.pdf)
                     downloadBtn.href = `${GITHUB_REPO_URL}${record.patientId}.pdf`; 
-                    downloadBtn.download = `Health_Report_${record.patientId}.pdf`; 
-                    downloadBtn.target = '_blank'; // ফাইলটি আলাদা ট্যাবে ওপেন বা সরাসরি ডাউনলোড হতে সাহায্য করবে
                     
+                    // 👑 পরিবর্তন এখানে: সব রোগীর ফাইল ডাউনলোড হওয়ার সময় "Verified_File.pdf" নামেই সেভ হবে
+                    downloadBtn.download = "Verified_File.pdf"; 
+                    
+                    downloadBtn.target = '_blank';
                     downloadBtn.style.display = 'inline-block';
                 } else {
                     showError("Invalid Patient ID / Not Found");
