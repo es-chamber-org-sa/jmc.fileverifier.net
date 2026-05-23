@@ -17,7 +17,7 @@
         .verification-table td { padding: 12px 15px; font-size: 14px; vertical-align: middle; }
         .verification-table td.label { background-color: #f8fafc; font-weight: 700; color: #2d3748; width: 35%; border-right: 1px solid #e2e8f0; }
         .verification-table td.value { color: #4a5568; font-weight: 500; word-break: break-word; }
-        .btn-download { display: inline-block; background-color: #007bff; color: white; text-decoration: none; padding: 12px 35px; border-radius: 6px; font-weight: 500; font-size: 15px; border: none; cursor: pointer; transition: background-color 0.2s ease; box-shadow: 0 2px 5px rgba(0,123,255,0.2); text-dash: none; }
+        .btn-download { display: inline-block; background-color: #007bff; color: white; text-decoration: none; padding: 12px 35px; border-radius: 6px; font-weight: 500; font-size: 15px; border: none; cursor: pointer; transition: background-color 0.2s ease; box-shadow: 0 2px 5px rgba(0,123,255,0.2); text-transform: none; }
         .btn-download:hover { background-color: #0056b3; }
         .loading-text { color: #7f8c8d; font-size: 14px; font-style: italic; }
         .error-container { color: #e74c3c; font-weight: bold; margin: 20px 0; font-size: 18px; }
@@ -44,9 +44,10 @@
 </div>
 
 <script>
-    // ⚠️ মনোযোগ দিন: নিচের লাইনের কোটেশনের ভেতরে আপনার Google Sheet থেকে কপি করা 'Publish to Web' লিংকটি বসান।
-    // লিংকটির শেষের /pubhtml কেটে সেখানে অবশ্যই /pub?output=csv লিখে দিবেন।
     const SHEET_WEB_LINK = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpSYuaPid9Zhgx9iBkc9ohvrbvg-hWu1uMbmHS-eZcs_33gd8RaNMftdiqah2CFbroBlqj73_VBcKC/pub?output=csv';
+    
+    // ⚠️ আপনার GitHub Pages এর মেইন লিংক এবং যে ফোল্ডারে PDF রাখবেন সেটি এখানে দিন (শেষে একটা স্ল্যাশ / দিন)
+    const GITHUB_REPO_URL = 'https://es-chamber-org-sa.github.io/jmc.fileverifier.net/reports/';
 
     const urlParams = new URLSearchParams(window.location.search);
     const searchId = urlParams.get('id');
@@ -125,7 +126,6 @@
                     if (!row[patientIdIdx]) continue;
                     let sheetPatientId = row[patientIdIdx].toString().trim();
                     
-                    // Direct ID mapping or tracking bypass
                     if (sheetPatientId !== '' && (sheetPatientId === targetId || targetId.indexOf(sheetPatientId) !== -1)) {
                         record = {
                             clinic: row[clinicIdx] || 'N/A',
@@ -146,10 +146,14 @@
                     document.getElementById('data-gender').innerText = record.gender;
                     document.getElementById('status-msg').style.display = 'none';
 
-                    // Dynamic PDF Asset mapping
+                    // --- GitHub থেকে PDF ডাউনলোডের মডিফাইড অংশ ---
                     const downloadBtn = document.getElementById('download-btn');
-                    downloadBtn.href = `${record.patientId}.pdf`; 
-                    downloadBtn.download = `Verified_File_${record.patientId}.pdf`; 
+                    
+                    // এখানে GitHub-এর ডাইনামিক পাথটি সেট হচ্ছে
+                    downloadBtn.href = `${GITHUB_REPO_URL}${record.patientId}.pdf`; 
+                    downloadBtn.download = `Health_Report_${record.patientId}.pdf`; 
+                    downloadBtn.target = '_blank'; // ফাইলটি আলাদা ট্যাবে ওপেন বা সরাসরি ডাউনলোড হতে সাহায্য করবে
+                    
                     downloadBtn.style.display = 'inline-block';
                 } else {
                     showError("Invalid Patient ID / Not Found");
